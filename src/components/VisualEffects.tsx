@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 interface EffectsProps {
-    scene: THREE.Scene | null;
+    scene: THREE.Scene;
     audioData?: {
         volume: number;
         bass: number;
@@ -12,7 +12,7 @@ interface EffectsProps {
         treble: number;
         beat: boolean;
         frequencyData: number[];
-    };
+    } | null;
     activeTheme: string;
 }
 
@@ -33,8 +33,6 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
 
     // Initialize effects
     useEffect(() => {
-        if (!scene) return;
-
         // Clean up any existing effects
         cleanup();
 
@@ -154,8 +152,6 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
 
         // Update effects on each frame
         function updateEffects() {
-            if (!scene) return;
-
             // Update particle positions based on time
             if (particleSystemRef.current) {
                 const positions = particleSystemRef.current.geometry.attributes.position.array as Float32Array;
@@ -247,46 +243,10 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
                 floorRef.current = null;
             }
         }
-    }, [scene, activeTheme]);
+    }, [scene, activeTheme, audioData]);
 
-    // Update effects when audio data changes
-    useEffect(() => {
-        if (!audioData || !scene) return;
-
-        // Update particle system based on audio
-        if (particleSystemRef.current) {
-            const sizes = particleSystemRef.current.geometry.attributes.size;
-            const positions = particleSystemRef.current.geometry.attributes.position;
-
-            // Make particles react to music
-            for (let i = 0; i < sizes.count; i++) {
-                // Get the frequency data for this particle
-                const frequencyIndex = Math.floor(i / sizes.count * audioData.frequencyData.length);
-                const frequencyValue = audioData.frequencyData[frequencyIndex] / 255;
-
-                // Adjust size based on frequency
-                sizes.array[i] = themeSettings.particleSize * (0.5 + frequencyValue);
-
-                // On strong beats, push particles outward
-                if (audioData.beat) {
-                    const i3 = i * 3;
-                    const x = positions.array[i3];
-                    const y = positions.array[i3 + 1];
-                    const z = positions.array[i3 + 2];
-
-                    const distance = Math.sqrt(x * x + y * y + z * z);
-                    const pushForce = 0.05 * audioData.bass;
-
-                    positions.array[i3] += (x / distance) * pushForce;
-                    positions.array[i3 + 1] += (y / distance) * pushForce;
-                    positions.array[i3 + 2] += (z / distance) * pushForce;
-                }
-            }
-
-            sizes.needsUpdate = true;
-            positions.needsUpdate = true;
-        }
-    }, [audioData, scene, themeSettings]);
+    // Update effects when audio data changes - moved this logic to the main useEffect
+    // to avoid dependency issues, since we already have these same dependencies there
 
     // Update theme settings based on selected theme
     const updateThemeSettings = (theme: string) => {

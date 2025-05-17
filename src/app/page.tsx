@@ -5,7 +5,8 @@ import dynamic from 'next/dynamic';
 import ControlPanel from '@/components/ControlPanel';
 
 // Import the enhanced MerlinViewer component with dynamic import
-const MerlinViewer = dynamic(() => import('@/components/MerlinViewer'), {
+const MerlinViewer = dynamic(
+  () => import('@/components/MerlinViewer').then(mod => mod.default), {
   loading: () => <div className="w-full h-screen flex items-center justify-center bg-black text-white">Loading immersive visualizer...</div>,
   ssr: false
 });
