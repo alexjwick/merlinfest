@@ -30,7 +30,9 @@ const MerlinViewer = () => {
     const [error, setError] = useState<string | null>(null);
     const [activeTheme, setActiveTheme] = useState('default');
     const [modelPath, setModelPath] = useState<string>('/models/merlin.glb');
-    const [audioData, setAudioData] = useState<AudioData | null>(null);
+
+    // Use a ref instead of state for audio data to prevent infinite update loops
+    const audioDataRef = useRef<AudioData | null>(null);
 
     // Refs to store Three.js objects
     const sceneRef = useRef<THREE.Scene | null>(null);
@@ -42,7 +44,8 @@ const MerlinViewer = () => {
 
     // Handle audio data from AudioAnalyzer
     const handleAudioData = (data: AudioData) => {
-        setAudioData(data);
+        // Store in ref instead of state to avoid render loops
+        audioDataRef.current = data;
 
         // Apply audio reactivity to Merlin model
         if (merlinModelRef.current && data) {
@@ -372,7 +375,7 @@ const MerlinViewer = () => {
             {sceneRef.current && (
                 <VisualEffects
                     scene={sceneRef.current}
-                    audioData={audioData}
+                    audioData={audioDataRef.current}
                     activeTheme={activeTheme}
                 />
             )}
