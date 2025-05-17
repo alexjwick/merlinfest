@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, CSSProperties } from "react";
+import { CSSProperties } from "react";
 import { useSocket } from "../../hooks/useSocket";
 
 // Define theme style type

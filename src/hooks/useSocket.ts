@@ -87,7 +87,7 @@ export function useSocket(): UseSocketReturn {
       visualUpdateCleanup();
       userCountCleanup();
     };
-  }, []);
+  }, [socketService]); // Added socketService as dependency
 
   // Methods to interact with the socket
   const updateVisuals = (visualData: Partial<VisualState>): void => {
