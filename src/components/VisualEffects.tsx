@@ -3,19 +3,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-// Define types for the component props
-interface AudioData {
-    volume: number;
-    bass: number;
-    mid: number;
-    treble: number;
-    beat: boolean;
-    frequencyData: number[];
-}
-
 interface EffectsProps {
     scene: THREE.Scene | null;
-    audioData?: AudioData | null;
+    audioData?: {
+        volume: number;
+        bass: number;
+        mid: number;
+        treble: number;
+        beat: boolean;
+        frequencyData: number[];
+    };
     activeTheme: string;
 }
 
@@ -56,25 +53,21 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
 
         // Initialize the visual effects
         function initEffects() {
-            // Since we've already checked that scene is not null at the beginning of useEffect
-            // TypeScript should recognize that scene can't be null here, but let's be explicit
-            const sceneInstance = scene!;
-
             // 1. Create particle system
-            createParticleSystem(sceneInstance);
+            createParticleSystem();
 
             // 2. Create glow effect
-            createGlowEffect(sceneInstance);
+            createGlowEffect();
 
             // 3. Create reflective floor
-            createFloor(sceneInstance);
+            createFloor();
 
             // Start the update loop
             updateEffects();
         }
 
         // Create particle system
-        function createParticleSystem(sceneInstance: THREE.Scene) {
+        function createParticleSystem() {
             const particleCount = themeSettings.particleCount;
             const particles = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
@@ -119,13 +112,13 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
             });
 
             const particleSystem = new THREE.Points(particles, particleMaterial);
-            sceneInstance.add(particleSystem);
+            scene.add(particleSystem);
 
             particleSystemRef.current = particleSystem;
         }
 
         // Create glow effect around the center
-        function createGlowEffect(sceneInstance: THREE.Scene) {
+        function createGlowEffect() {
             const glowGeometry = new THREE.SphereGeometry(1.5, 32, 32);
             const glowMaterial = new THREE.MeshBasicMaterial({
                 color: themeSettings.glowColor,
@@ -136,13 +129,13 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
 
             const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
             glowMesh.scale.set(1.5, 1.5, 1.5);
-            sceneInstance.add(glowMesh);
+            scene.add(glowMesh);
 
             glowRef.current = glowMesh;
         }
 
         // Create reflective floor
-        function createFloor(sceneInstance: THREE.Scene) {
+        function createFloor() {
             const floorGeometry = new THREE.PlaneGeometry(20, 20);
             const floorMaterial = new THREE.MeshStandardMaterial({
                 color: themeSettings.floorColor,
@@ -154,7 +147,7 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
             floor.rotation.x = Math.PI / 2;
             floor.position.y = -2;
-            sceneInstance.add(floor);
+            scene.add(floor);
 
             floorRef.current = floor;
         }
@@ -233,8 +226,6 @@ const VisualEffects: React.FC<EffectsProps> = ({ scene, audioData, activeTheme }
 
         // Clean up effects
         function cleanup() {
-            if (!scene) return;
-
             if (particleSystemRef.current && scene.children.includes(particleSystemRef.current)) {
                 scene.remove(particleSystemRef.current);
                 particleSystemRef.current.geometry.dispose();
