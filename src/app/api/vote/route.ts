@@ -4,31 +4,44 @@ import { PrismaClient } from "@/generated/prisma";
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
-  const { activeTheme, speed, intensity, colorScheme, effectIds } =
-    await req.json();
+  try {
+    const { userId, theme } = await req.json();
 
-  const updatedState = await prisma.visualState.upsert({
-    where: { id: 1 }, // assume single record
-    update: {
-      activeTheme,
-      speed,
-      intensity,
-      colorScheme,
-      effectIds,
-    },
-    create: {
-      activeTheme,
-      speed,
-      intensity,
-      colorScheme,
-      effectIds,
-    },
-  });
+    if (!userId || !theme) {
+      return NextResponse.json(
+        { error: "Missing userId or theme" },
+        { status: 400 }
+      );
+    }
 
-  return NextResponse.json(updatedState);
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Create the vote
+    const vote = await prisma.vote.create({
+      data: {
+        userId,
+        theme,
+      },
+    });
+
+    return NextResponse.json(vote);
+  } catch (error) {
+    console.error("Vote creation error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function GET() {
-  const state = await prisma.visualState.findFirst();
-  return NextResponse.json(state);
+  const votes = await prisma.vote.findMany();
+  return NextResponse.json(votes);
 }
