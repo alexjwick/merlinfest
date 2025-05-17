@@ -1,9 +1,9 @@
-# Merlinfest Interactive Visuals - Development Plan
+◊# Merlinfest Interactive Visuals - Development Plan
 
 ## Project Timeline Overview
 
 | Phase                         | Duration | Dates  | Focus                                        |
-| ----------------------------- | -------- | ------ | -------------------------------------------- |
+| --------------◊--------------- | -------- | ------ | -------------------------------------------- |
 | Phase 1: Foundation           | 1 week   | Week 1 | Project setup, architecture, basic functions |
 | Phase 2: Visual Experience    | 1 week   | Week 2 | Visual effects, themes, rendering engine     |
 | Phase 3: User Interaction     | 1 week   | Week 3 | Multi-user support, DJ integration           |
