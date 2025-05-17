@@ -138,3 +138,6 @@ dist
 # prisma
 
 src/generated
+
+
+.DS_STORE
