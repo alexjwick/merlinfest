@@ -47,6 +47,11 @@ const MerlinViewer = () => {
         // Store in ref instead of state to avoid render loops
         audioDataRef.current = data;
 
+        console.log("Audio data received:",
+            `volume: ${data.volume.toFixed(2)}, ` +
+            `bass: ${data.bass.toFixed(2)}, ` +
+            `beat: ${data.beat}`);
+
         // Apply audio reactivity to Merlin model
         if (merlinModelRef.current && data) {
             // Make Merlin bounce to the beat
@@ -269,6 +274,13 @@ const MerlinViewer = () => {
                     // Update controls
                     controls.update();
 
+                    // Here we force a re-render of VisualEffects if audio data is received
+                    // This is optional since we made VisualEffects check audioData in its own loop
+                    if (audioDataRef.current && audioDataRef.current.volume > 0.05) {
+                        // Force a small camera movement to trigger a render
+                        camera.position.x += 0.0001 * (Math.random() - 0.5);
+                    }
+
                     // Render
                     renderer.render(scene, camera);
                 };
@@ -312,7 +324,7 @@ const MerlinViewer = () => {
         };
 
         initScene();
-    }, []); // Empty dependency array for initial setup
+    }, [modelPath]); // Added modelPath as dependency so scene is reinitialized when model changes
 
     // Effect to handle model changes when theme changes
     useEffect(() => {
