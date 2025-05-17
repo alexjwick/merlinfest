@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  nickname     String?
+  joinedAt     DateTime      @default(now())
+  lastActive   DateTime      @updatedAt
+  voteCount    Int           @default(0)
+  votes        Vote[]
+  interactions Interaction[]
+
+  @@index([id])
+}
+
+model VisualState {
+  id          Int      @id @default(autoincrement())
+  activeTheme String
+  speed       Float    @default(1.0)
+  intensity   Float    @default(1.0)
+  colorScheme String   @default("default")
+  effectIds   Json
+  activeUsers Int      @default(0)
+  lastUpdated DateTime @updatedAt
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  theme     String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Interaction {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  actionType String
+  details    Json
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model DJ {
+  id           Int      @id @default(autoincrement())
+  name         String
+  setStart     DateTime
+  setEnd       DateTime
+  visualPreset String
+}
